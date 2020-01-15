@@ -1,0 +1,102 @@
+import math
+from time import time
+
+import numpy as np
+
+from universal_method import load_csv_file
+
+
+def calculate_distance(file) -> list:
+    data = np.loadtxt(file)
+    users_dict = sorted_data(sort_user(data))
+    items_dict = sorted_data(sort_item(data))
+    users = list(users_dict.keys())
+    U = len(users)
+
+    lambda_s = {}
+    for k, v in items_dict.items():
+        lambda_s[k] = math.log(U / len(v))
+
+    result = []
+    for i in range(U):
+        for j in range(i):
+            u = users[i]
+            v = users[j]
+            d_u_v = distance(users_dict[u], users_dict[v], lambda_s)
+            result.append([u, v, d_u_v])
+    return result
+
+
+def sort_user(data) -> map:
+    data = sorted(data, key=lambda x: x[0])
+    data = map(lambda x: [int(x[0]), [int(x[1]), x[2]]], data)
+    return data
+
+
+def sort_item(data) -> map:
+    data = sorted(data, key=lambda x: x[1])
+    data = map(lambda x: [int(x[1]), [int(x[0]), x[2]]], data)
+    return data
+
+
+def sorted_data(data) -> dict:
+    data_dict = {}
+    first = next(data)
+    index = first[0]
+    cur_list = [first[1]]
+    for i in data:
+        if index == i[0]:
+            cur_list.append(i[1])
+        else:
+            data_dict[index] = dict(cur_list)
+            index = i[0]
+            cur_list = [i[1]]
+    data_dict[index] = dict(cur_list)
+    return data_dict
+
+
+def distance(u: dict, v: dict, lambda_s: dict) -> float:
+    u_len = len(u)
+    v_len = len(v)
+    u_mean = sum(u.values()) / u_len
+    v_mean = sum(u.values()) / v_len
+    u_set = set(u.keys())
+    v_set = set(v.keys())
+    m_set = u_set & v_set
+    if len(m_set) == 0:
+        return 0.0
+    u_array = np.array(list(map(lambda x: u[x], m_set)))
+    v_array = np.array(list(map(lambda x: v[x], m_set)))
+    lambda_array = np.array(list(map(lambda x: lambda_s[x], m_set)))
+    d = np.sqrt(np.mean(np.square((u_array - u_mean) - (v_array - v_mean)) * lambda_array))
+    # return 1.0 / (1.0 + d)
+    return d
+
+
+def convert_distance_result(result: list) -> dict:
+    result_dict = {}
+    for i in result:
+        u, v, d = i
+        if u in result_dict:
+            result_dict[u].append([v, d])
+        else:
+            result_dict[u] = [[v, d]]
+        if v in result_dict:
+            result_dict[v].append([u, d])
+        else:
+            result_dict[v] = [[u, d]]
+    result_dict.update(map(lambda k: (k, sorted(result_dict[k], key=lambda x: x[1])), result_dict.keys()))
+    return result_dict
+
+
+def main():
+    t1 = time()
+    r = calculate_distance(load_csv_file(5, 1))
+    c_r = convert_distance_result(r)
+    print(time() - t1)
+    for k, v in c_r.items():
+        print(k, v[:3])
+
+
+if __name__ == '__main__':
+    main()
