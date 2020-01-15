@@ -99,7 +99,7 @@ def convert_type(python_type: type) -> str:
     elif python_type == float:
         mysql_type = 'double'
     elif python_type == str:
-        mysql_type = 'char'
+        mysql_type = 'text'
     elif python_type == bool:
         mysql_type = 'tinyint(1)'
     elif python_type == date:
@@ -109,7 +109,7 @@ def convert_type(python_type: type) -> str:
     elif python_type == time:
         mysql_type = 'time'
     else:
-        mysql_type = 'char'
+        mysql_type = 'text'
     return mysql_type
 
 

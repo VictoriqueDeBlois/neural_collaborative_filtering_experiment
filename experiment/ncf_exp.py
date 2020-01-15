@@ -7,10 +7,13 @@ from keras import metrics
 from keras.optimizers import Adagrad, Adam, SGD, RMSprop
 
 import origin_model.NeuMF
+import origin_model.MLP
 from experiment_structure import ExperimentData
 from improve_distance_calculate import calculate_distance, convert_distance_result
-from universal_method import load_csv_file
+from sensitive_info import database_config
+from universal_method import load_csv_file, auto_insert_database
 from universal_method import load_data, ws_num, user_num, mkdir
+from experiment.simple_ncf_modle import simple_ncf
 
 
 def extend_array(times: int, distance: dict, user_id: np.ndarray, item_id: np.ndarray, rating: np.ndarray):
@@ -52,6 +55,8 @@ def experiment(experiment_data: ExperimentData):
 
     model = origin_model.NeuMF.get_model(num_users=user_num, num_items=ws_num, layers=layers, reg_layers=reg_layers,
                                          mf_dim=mf_dim)
+
+    # model = origin_model.MLP.get_model(user_num, ws_num, layers, reg_layers)
     # print(model.summary())
     model.compile(optimizer=optimizer,
                   loss='mae',
@@ -81,16 +86,18 @@ def experiment(experiment_data: ExperimentData):
 
 if __name__ == '__main__':
     os.environ["CUDA_VISIBLE_DEVICES"] = "1"
-    for i in range(5):
-        data = ExperimentData()
-        data.sparseness = 5
-        data.data_index = 3
-        data.mf_dim = 8
-        data.epochs = 20
-        data.batch_size = 256
-        data.layers = [64, 32, 16, 8]
-        data.reg_layers = [0, 0, 0, 0]
-        data.learning_rate = 0.001
-        data.extend_near_num = i
-        data.learner = 'adam'
-        experiment(data)
+    for s in [5, 10]:
+        for i in range(1, 4):
+            data = ExperimentData()
+            data.sparseness = s
+            data.data_index = i
+            data.mf_dim = 8
+            data.epochs = 30
+            data.batch_size = 256
+            data.layers = [64, 32, 16, 8]
+            data.reg_layers = [0, 0, 0, 0]
+            data.learning_rate = 0.001
+            data.extend_near_num = 0
+            data.learner = 'adam'
+            experiment(data)
+
