@@ -17,28 +17,28 @@ class ExperimentData(object):
 
     def to_dict(self) -> dict:
         return {
-            'sparseness': self.sparseness,
-            'data_index': self.data_index,
-            'mf_dim': self.mf_dim,
-            'epochs': self.epochs,
+            'sparseness': int(self.sparseness),
+            'data_index': int(self.data_index),
+            'mf_dim': int(self.mf_dim),
+            'epochs': int(self.epochs),
             'batch_size':
-                self.batch_size,
+                int(self.batch_size),
             'layers':
                 str(self.layers),
             'reg_layers':
                 str(self.reg_layers),
             'learning_rate':
-                self.learning_rate,
+                float(self.learning_rate),
             'learner':
-                self.learner,
+                str(self.learner),
             'extend_near_num':
-                self.extend_near_num,
+                int(self.extend_near_num),
             'loss':
-                self.loss,
+                float(self.loss),
             'mae':
-                self.mae,
+                float(self.mae),
             'rmse':
-                self.rmse,
+                float(self.rmse),
             'model':
-                self.model
+                str(self.model)
         }

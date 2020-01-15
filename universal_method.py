@@ -3,9 +3,13 @@ import sqlite3
 import time
 from datetime import date, datetime, time
 from typing import Union
+from os.path import join, dirname
 
 import mysql.connector
 import numpy as np
+
+user_num = 339
+ws_num = 5825
 
 
 def load_original_matrix_data(file_name):
@@ -14,11 +18,12 @@ def load_original_matrix_data(file_name):
 
 
 def load_csv_file(sparseness, index, matrix_type='rt', training_set=True, ext='csv'):
-    return './CSV_{matrix_type}/sparseness{sparseness}/{data}{index}.{ext}' \
+    file = 'CSV_{matrix_type}/sparseness{sparseness}/{data}{index}.{ext}' \
         .format(matrix_type=matrix_type, sparseness=sparseness,
                 data='training' if training_set else 'test',
                 index=index,
                 ext=ext)
+    return join(dirname(__file__), file)
 
 
 def mkdir(path):
@@ -129,12 +134,12 @@ def evaluate(sparseness, index, fit_matrix):
     return mae, rmse
 
 
-def create_sparse_matrix(filename, user_num=339, ws_num=5825):
+def create_sparse_matrix(filename, num_users=user_num, num_items=ws_num):
     user_ls, ws_ls, rt = load_data(filename)
-    array_obj = np.zeros((user_num, ws_num))
+    array_obj = np.zeros((num_users, num_items))
     array_obj[user_ls, ws_ls] = rt
     return array_obj
 
 
 if __name__ == '__main__':
-    pass
+    print(load_csv_file(5, 1))
