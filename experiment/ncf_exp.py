@@ -5,15 +5,14 @@ import numpy as np
 import keras
 from keras import metrics
 from keras.optimizers import Adagrad, Adam, SGD, RMSprop
+import keras.backend as K
 
-import origin_model.NeuMF
-import origin_model.MLP
+import custom_model.NeuMF
 from experiment_structure import ExperimentData
 from improve_distance_calculate import calculate_distance, convert_distance_result
 from sensitive_info import database_config
 from universal_method import load_csv_file, auto_insert_database
 from universal_method import load_data, ws_num, user_num, mkdir
-from experiment.simple_ncf_modle import simple_ncf
 
 
 def extend_array(times: int, distance: dict, user_id: np.ndarray, item_id: np.ndarray, rating: np.ndarray):
@@ -25,7 +24,7 @@ def extend_array(times: int, distance: dict, user_id: np.ndarray, item_id: np.nd
     return users, items, ratings
 
 
-def experiment(experiment_data: ExperimentData):
+def experiment(experiment_data: ExperimentData, last_activation):
     sparseness = experiment_data.sparseness  # 5
     index = experiment_data.data_index  # 3
     mf_dim = experiment_data.mf_dim  # 32
@@ -53,11 +52,9 @@ def experiment(experiment_data: ExperimentData):
 
     early_stop = keras.callbacks.EarlyStopping(monitor='mean_absolute_error', min_delta=0.0002, patience=10)
 
-    model = origin_model.NeuMF.get_model(num_users=user_num, num_items=ws_num, layers=layers, reg_layers=reg_layers,
-                                         mf_dim=mf_dim)
+    model = custom_model.NeuMF.get_model(num_users=user_num, num_items=ws_num, layers=layers, reg_layers=reg_layers,
+                                         mf_dim=mf_dim, last_activation=last_activation)
 
-    # model = origin_model.MLP.get_model(user_num, ws_num, layers, reg_layers)
-    # print(model.summary())
     model.compile(optimizer=optimizer,
                   loss='mae',
                   metrics=[metrics.mae, metrics.mse])
@@ -70,7 +67,7 @@ def experiment(experiment_data: ExperimentData):
 
     mkdir('./Trained')
     model.save('./Trained/{}'.format(model_out_file))
-    loss, mae, mse = model.evaluate([test_userId, test_itemId], test_rating)
+    loss, mae, mse = model.evaluate([test_userId, test_itemId], test_rating, steps=1)
     # print('loss: ', loss)
     # print('mae: ', mae)
     # print('rmse', np.sqrt(mse))
@@ -80,24 +77,28 @@ def experiment(experiment_data: ExperimentData):
     experiment_data.rmse = np.sqrt(mse)
     exp_data = experiment_data.to_dict()
     exp_data['datetime'] = datetime.now()
+    exp_data['last_activation'] = last_activation
     print(exp_data)
-    # auto_insert_database(database_config, exp_data, 'ncf_rt')
+    auto_insert_database(database_config, exp_data, 'ncf_rt')
 
 
 if __name__ == '__main__':
     os.environ["CUDA_VISIBLE_DEVICES"] = "1"
-    for s in [5, 10]:
-        for i in range(1, 4):
-            data = ExperimentData()
-            data.sparseness = s
-            data.data_index = i
-            data.mf_dim = 8
-            data.epochs = 30
-            data.batch_size = 256
-            data.layers = [64, 32, 16, 8]
-            data.reg_layers = [0, 0, 0, 0]
-            data.learning_rate = 0.001
-            data.extend_near_num = 0
-            data.learner = 'adam'
-            experiment(data)
+    for s in [5]:
+        for i in [2]:
+            for a in range(2):
+                for e in [0, 1, 2, 3, 4, 5, 10, 15, 20]:
+                    data = ExperimentData()
+                    data.sparseness = s
+                    data.data_index = i
+                    data.mf_dim = 8
+                    data.epochs = 30
+                    data.batch_size = 256
+                    data.layers = [64, 32, 16, 8]
+                    data.reg_layers = [0, 0, 0, 0]
+                    data.learning_rate = 0.001
+                    data.extend_near_num = e
+                    data.learner = 'adam'
+                    experiment(data, 'sigmoid' if a == 0 else 'relu')
+
 
