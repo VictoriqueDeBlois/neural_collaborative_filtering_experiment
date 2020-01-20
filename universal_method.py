@@ -77,9 +77,10 @@ def auto_insert_database(config: dict,
         if len_diff > 0:
             auto_add_column(cursor, diff, data, table)
     # insert data
-    keys = ', '.join(data.keys())
+    keys = ', '.join(map(lambda k: '`{}`'.format(k), data.keys()))
     holder = ', '.join(map(lambda k: '%({})s'.format(k), data.keys()))
     insert_query = 'insert into `{}` ({}) values ({})'.format(table, keys, holder)
+    data = convert_unknown_type_to_str(data)
     cursor.execute(insert_query, data)
     cnx.commit()
     cursor.close()
@@ -90,6 +91,13 @@ def key_to_lower(data: dict):
     new_dict = {}
     for k, v in data.items():
         new_dict[k.lower()] = v
+    return new_dict
+
+
+def convert_unknown_type_to_str(data: dict):
+    new_dict = {}
+    for k, v in data.items():
+        new_dict[k] = str(v) if convert_type(type(v)) == 'text' else v
     return new_dict
 
 

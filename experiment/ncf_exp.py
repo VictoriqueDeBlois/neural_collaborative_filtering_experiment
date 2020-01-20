@@ -5,7 +5,6 @@ import numpy as np
 import keras
 from keras import metrics
 from keras.optimizers import Adagrad, Adam, SGD, RMSprop
-import keras.backend as K
 
 import custom_model.NeuMF
 from experiment_structure import ExperimentData
@@ -84,10 +83,26 @@ def experiment(experiment_data: ExperimentData, last_activation):
 
 if __name__ == '__main__':
     os.environ["CUDA_VISIBLE_DEVICES"] = "1"
+    for s in [5, 10]:
+        for i in [1, 2, 3]:
+            for a in range(2):
+                for e in [0]:
+                    data = ExperimentData()
+                    data.sparseness = s
+                    data.data_index = i
+                    data.mf_dim = 8
+                    data.epochs = 30
+                    data.batch_size = 256
+                    data.layers = [64, 32, 16, 8]
+                    data.reg_layers = [0, 0, 0, 0]
+                    data.learning_rate = 0.001
+                    data.extend_near_num = e
+                    data.learner = 'adam'
+                    experiment(data, 'sigmoid' if a == 0 else 'relu')
     for s in [5]:
         for i in [2]:
             for a in range(2):
-                for e in [0, 1, 2, 3, 4, 5, 10, 15, 20]:
+                for e in [1, 2, 3, 4, 5, 10, 15, 20]:
                     data = ExperimentData()
                     data.sparseness = s
                     data.data_index = i

@@ -101,7 +101,7 @@ def experiment(**kwargs):
 
 
 if __name__ == '__main__':
-    os.environ["CUDA_VISIBLE_DEVICES"] = "1"
+    os.environ["CUDA_VISIBLE_DEVICES"] = "0"
     for s in [5]:
         for i in [2]:
             for a in ['relu', 'sigmoid']:
@@ -109,7 +109,7 @@ if __name__ == '__main__':
                     exp_data = {
                         'sparseness': s,
                         'index': i,
-                        'epochs': 30,
+                        'epochs': 50,
                         'batch_size': 256,
                         'layers': [64, 32, 16, 8],
                         'reg_layers': [0, 0, 0, 0],

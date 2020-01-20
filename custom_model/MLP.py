@@ -11,7 +11,7 @@ from keras.models import Model
 from keras.regularizers import l2
 
 
-def get_model(num_users, num_items, layers=None, reg_layers=None):
+def get_model(num_users, num_items, layers=None, reg_layers=None, last_activation='sigmoid'):
     if reg_layers is None:
         reg_layers = [0, 0]
     if layers is None:
@@ -43,7 +43,7 @@ def get_model(num_users, num_items, layers=None, reg_layers=None):
         vector = layer(vector)
 
     # Final prediction layer
-    prediction = Dense(1, activation='sigmoid', kernel_initializer='lecun_uniform', name='prediction')(vector)
+    prediction = Dense(1, activation=last_activation, kernel_initializer='lecun_uniform', name='prediction')(vector)
 
     model = Model(inputs=[user_input, item_input],
                   outputs=prediction)
