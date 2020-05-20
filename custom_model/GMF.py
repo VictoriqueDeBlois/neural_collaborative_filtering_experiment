@@ -12,7 +12,7 @@ from keras.models import Model
 from keras.regularizers import l2
 
 
-def get_model(num_users, num_items, latent_dim, regs=None):
+def get_model(num_users, num_items, latent_dim, regs=None, last_activation='sigmoid'):
     # Input variables
     if regs is None:
         regs = [0, 0]
@@ -27,7 +27,7 @@ def get_model(num_users, num_items, latent_dim, regs=None):
     # MF_Embedding_Item = Embedding(input_dim = num_items, output_dim = latent_dim, name = 'item_embedding',
     # init = init_normal, W_regularizer = l2(regs[1]), input_length=1)
     MF_Embedding_Item = Embedding(input_dim=num_items, output_dim=latent_dim, name='item_embedding',
-                                  embeddings_initializer='random_normal', embeddings_regularizer=l2(regs[0]),
+                                  embeddings_initializer='random_normal', embeddings_regularizer=l2(regs[1]),
                                   input_length=1)
 
     # Crucial to flatten an embedding vector!
@@ -40,7 +40,7 @@ def get_model(num_users, num_items, latent_dim, regs=None):
     # predict_vector = merge.dot([user_latent, item_latent], 1)
     # Final prediction layer
     # prediction = Lambda(lambda x: K.sigmoid(K.sum(x)), output_shape=(1,))(predict_vector)
-    prediction = Dense(1, activation='sigmoid', kernel_initializer='lecun_uniform', name='prediction')(predict_vector)
+    prediction = Dense(1, activation=last_activation, kernel_initializer='lecun_uniform', name='prediction')(predict_vector)
 
     model = Model(inputs=[user_input, item_input],
                   outputs=prediction)

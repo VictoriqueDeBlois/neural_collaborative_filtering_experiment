@@ -61,7 +61,7 @@ def experiment(experiment_data: ExperimentData, last_activation):
     model.fit([userId, itemId], rating,
               batch_size=batch_size, epochs=epochs,
               callbacks=[early_stop],
-              verbose=1,
+              verbose=0,
               shuffle=True)
 
     mkdir('./Trained')

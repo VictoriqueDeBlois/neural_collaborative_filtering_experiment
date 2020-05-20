@@ -4,6 +4,10 @@ import time
 from datetime import date, datetime, time
 from typing import Union
 from os.path import join, dirname
+import smtplib
+from email.mime.text import MIMEText
+from email.header import Header
+import prettytable as pt
 
 import mysql.connector
 import numpy as np
@@ -149,5 +153,61 @@ def create_sparse_matrix(filename, num_users=user_num, num_items=ws_num):
     return array_obj
 
 
+def send_email(receiver, title, text, mail_host=None, mail_user=None, mail_pass=None, **kwargs):
+    if 'mail_host' in kwargs:
+        mail_host = kwargs['mail_host']
+    if 'mail_user' in kwargs:
+        mail_user = kwargs['mail_user']
+    if 'mail_pass' in kwargs:
+        mail_pass = kwargs['mail_pass']
+    if mail_pass is None or mail_user is None or mail_host is None:
+        return
+    # 第三方 SMTP 服务
+    sender = mail_user
+
+    message = MIMEText(title, 'plain', 'utf-8')
+    subject = text
+    message['Subject'] = Header(subject, 'utf-8')
+    message['from'] = sender
+    message['to'] = receiver
+
+    try:
+        smtp_obj = smtplib.SMTP_SSL(host=mail_host)
+        smtp_obj.connect(mail_host, smtplib.SMTP_SSL_PORT)
+        smtp_obj.login(mail_user, mail_pass)
+        smtp_obj.sendmail(sender, receiver, message.as_string())
+        print("邮件发送成功")
+        smtp_obj.quit()
+    except smtplib.SMTPException as e:
+        print(e)
+        print("Error: 无法发送邮件")
+
+
+def get_table_count(config: dict, table: str):
+    cnx = mysql.connector.connect(**config)
+    cursor = cnx.cursor()
+    # check table
+    table_query = "select max(`table_no`) from `{}`".format(table)
+    cursor.execute(table_query)
+    count = list(cursor)[0]
+    cursor.close()
+    cnx.close()
+    return count
+
+
+def query_table_where_table_no_greater_than(config: dict, table: str, table_no: int):
+    cnx = mysql.connector.connect(**config)
+    cursor = cnx.cursor()
+    query = "select * from `{}` where `table_no` > {}".format(table, table_no)
+    cursor.execute(query)
+    cursor.column_names
+
+    cursor.close()
+    cnx.close()
+
+
 if __name__ == '__main__':
-    print(load_csv_file(5, 1))
+    print(mysql.connector.version.VERSION)
+    from sensitive_info import database_config
+    i = get_table_count(database_config, 'ncf_rt')
+    print(i)

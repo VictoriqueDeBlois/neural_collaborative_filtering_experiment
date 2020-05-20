@@ -6,7 +6,7 @@ import numpy as np
 from keras import metrics
 from keras.optimizers import Adagrad, Adam, SGD, RMSprop
 
-import custom_model.MLP
+import custom_model.GMF
 from experiment.ncf_exp import extend_array
 from improve_distance_calculate import calculate_distance, convert_distance_result
 from sensitive_info import database_config, email_config
@@ -20,8 +20,8 @@ def experiment(**kwargs):
     index = kwargs['index']
     epochs = kwargs['epochs']
     batch_size = kwargs['batch_size']
-    layers = kwargs['layers']
-    reg_layers = kwargs['reg_layers']
+    mf_dim = kwargs['mf_dim']
+    regs = kwargs['regs']
     last_activation = kwargs['last_activation']
     learning_rate = kwargs['learning_rate']
     extend_near_num = kwargs['extend_near_num']
@@ -31,8 +31,8 @@ def experiment(**kwargs):
         'index': index,
         'epochs': epochs,
         'batch_size': batch_size,
-        'layers': layers,
-        'reg_layers': reg_layers,
+        'mf_dim': mf_dim,
+        'regs': regs,
         'last_activation': last_activation,
         'learning_rate': learning_rate,
         'extend_near_num': extend_near_num,
@@ -44,7 +44,8 @@ def experiment(**kwargs):
                  'adam': Adam(lr=learning_rate),
                  'sgd': SGD(lr=learning_rate)}[learner]
     dataset_name = 'sparseness%s_%s' % (sparseness, index)
-    model_out_file = '%s_MLP_%s_%s.h5' % (dataset_name, layers, datetime.now())
+
+    model_out_file = '%s_GMF_%s_extend_%s_%s.h5' % (dataset_name, regs, extend_near_num, datetime.now())
     userId, itemId, rating = load_data(load_csv_file(sparseness, index))
 
     result = calculate_distance(load_csv_file(sparseness, index))
@@ -56,7 +57,7 @@ def experiment(**kwargs):
 
     early_stop = keras.callbacks.EarlyStopping(monitor='mean_absolute_error', min_delta=0.0002, patience=10)
 
-    model = custom_model.MLP.get_model(num_users=user_num, num_items=ws_num, layers=layers, reg_layers=reg_layers,
+    model = custom_model.GMF.get_model(num_users=user_num, num_items=ws_num, latent_dim=mf_dim, regs=regs,
                                        last_activation=last_activation)
 
     model.compile(optimizer=optimizer,
@@ -79,9 +80,8 @@ def experiment(**kwargs):
     exp_data['mae'] = float(mae)
     exp_data['rmse'] = float(np.sqrt(mse))
     exp_data['datetime'] = datetime.now()
-    exp_data['last_activation'] = last_activation
     print(exp_data)
-    auto_insert_database(database_config, exp_data, 'mlp_rt')
+    auto_insert_database(database_config, exp_data, 'gmf_rt')
     return exp_data
 
 
