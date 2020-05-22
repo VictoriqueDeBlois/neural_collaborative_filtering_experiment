@@ -1,13 +1,12 @@
 import os
+import smtplib
 import sqlite3
 import time
 from datetime import date, datetime, time
-from typing import Union
-from os.path import join, dirname
-import smtplib
-from email.mime.text import MIMEText
 from email.header import Header
-import prettytable as pt
+from email.mime.text import MIMEText
+from os.path import join, dirname
+from typing import Union
 
 import mysql.connector
 import numpy as np
@@ -30,6 +29,15 @@ def load_csv_file(sparseness, index, matrix_type='rt', training_set=True, ext='c
     return join(dirname(__file__), file)
 
 
+def save_csv_file(sparseness, index, extend, matrix_type='rt', ext='csv'):
+    file = 'CSV_{matrix_type}/sparseness{sparseness}/{data}{index}_ex{extend}.{ext}' \
+        .format(matrix_type=matrix_type, sparseness=sparseness, extend=extend,
+                data='training',
+                index=index,
+                ext=ext)
+    return join(dirname(__file__), file)
+
+
 def mkdir(path):
     if os.path.exists(path) is not True:
         os.mkdir(path)
@@ -42,6 +50,10 @@ def load_data(file):
     item_id = np.array(item_id, dtype=int)
     rating = np.array(rating, dtype=float)
     return user_id, item_id, rating
+
+
+def save_data(file, user_id, item_id, rating):
+    np.savetxt(file, np.array([user_id, item_id, rating]).T, "%.6f")
 
 
 def insert_database(path: str, table: str, data: dict):

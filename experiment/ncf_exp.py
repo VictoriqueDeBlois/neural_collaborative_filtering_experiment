@@ -8,19 +8,10 @@ from keras.optimizers import Adagrad, Adam, SGD, RMSprop
 
 import custom_model.NeuMF
 from experiment_structure import ExperimentData
-from improve_distance_calculate import calculate_distance, convert_distance_result
+from improve_distance_calculate import calculate_distance, convert_distance_result, extend_array
 from sensitive_info import database_config
 from universal_method import load_csv_file, auto_insert_database
 from universal_method import load_data, ws_num, user_num, mkdir
-
-
-def extend_array(times: int, distance: dict, user_id: np.ndarray, item_id: np.ndarray, rating: np.ndarray):
-    users = np.array(list(map(lambda x: np.append(x, np.array(distance[x])[:times][:, 0]), user_id)),
-                     dtype=int).flatten()
-    extend_times = list(map(lambda x: len(distance[x][:times]) + 1, user_id))
-    items = np.array(list(map(lambda x, y: [x] * y, item_id, extend_times)), dtype=int).flatten()
-    ratings = np.array(list(map(lambda x, y: [x] * y, rating, extend_times)), dtype=float).flatten()
-    return users, items, ratings
 
 
 def experiment(experiment_data: ExperimentData, last_activation):

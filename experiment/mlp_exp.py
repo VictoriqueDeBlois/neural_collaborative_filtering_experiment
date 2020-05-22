@@ -7,8 +7,7 @@ from keras import metrics
 from keras.optimizers import Adagrad, Adam, SGD, RMSprop
 
 import custom_model.MLP
-from experiment.ncf_exp import extend_array
-from improve_distance_calculate import calculate_distance, convert_distance_result
+from improve_distance_calculate import calculate_distance, convert_distance_result, extend_array
 from sensitive_info import database_config, email_config
 from universal_method import load_csv_file, auto_insert_database
 from universal_method import load_data, ws_num, user_num, mkdir
