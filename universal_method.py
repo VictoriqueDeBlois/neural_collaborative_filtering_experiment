@@ -177,8 +177,8 @@ def send_email(receiver, title, text, mail_host=None, mail_user=None, mail_pass=
     # 第三方 SMTP 服务
     sender = mail_user
 
-    message = MIMEText(title, 'plain', 'utf-8')
-    subject = text
+    message = MIMEText(text, 'plain', 'utf-8')
+    subject = title
     message['Subject'] = Header(subject, 'utf-8')
     message['from'] = sender
     message['to'] = receiver

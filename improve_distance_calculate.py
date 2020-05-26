@@ -1,7 +1,7 @@
 import math
 from multiprocessing import Pool
 from time import time
-
+from collections import Iterable
 import numpy as np
 
 from sensitive_info import email_config
@@ -106,6 +106,8 @@ def extend_array_and_save(sparseness, index, extend_near_num, distance, userId, 
 
 
 def save_extend_array(sparseness, index, extend_near_nums):
+    if isinstance(extend_near_nums, Iterable) is not True:
+        extend_near_nums = (extend_near_nums, )
     userId, itemId, rating = load_data(load_csv_file(sparseness, index))
     result = calculate_distance(load_csv_file(sparseness, index))
     distance = convert_distance_result(result)

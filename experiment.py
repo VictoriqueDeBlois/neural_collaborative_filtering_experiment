@@ -10,12 +10,11 @@ import experiment.gmf_exp
 
 
 def gmf_exp():
-    os.environ["CUDA_VISIBLE_DEVICES"] = "1"
-    for s in [15]:
-        for i in [1]:
+    for s in [1, 3]:
+        for i in [1, 2, 3, 4, 5]:
             for a in ['relu']:
                 for d in [128]:
-                    for e in [0]:
+                    for e in [0, 1, 2, 3, 4, 5, 10, 15, 20]:
                         exp_data = {
                             'sparseness': s,
                             'index': i,
@@ -36,7 +35,6 @@ def gmf_exp():
 
 
 def extend_mlp_exp():
-    os.environ["CUDA_VISIBLE_DEVICES"] = "1"
     for s in [5]:
         for i in [1, 3, 4, 5]:
             for a in ['relu']:
@@ -64,13 +62,10 @@ def extend_mlp_exp():
 
 
 def mlp_exp():
-    os.environ["CUDA_VISIBLE_DEVICES"] = "1"
-    for s in [5, 10, 15, 20]:
+    for s in [1, 3]:
         for i in [1, 2, 3, 4, 5]:
             for a in ['relu']:
                 for e in [0, 1, 2, 3, 4, 5, 10, 15, 20]:
-                    if s == 5 and (e == 0 or e == 5):
-                        continue
                     exp_data = {
                         'sparseness': s,
                         'index': i,
@@ -91,12 +86,9 @@ def mlp_exp():
 
 
 def ncf_exp():
-    os.environ["CUDA_VISIBLE_DEVICES"] = "1"
-    for s in [20]:
-        for i in [3, 4, 5]:
+    for s in [1, 3]:
+        for i in [1, 2, 3, 4, 5]:
             for e in [0, 1, 2, 3, 4, 5, 10, 15, 20]:
-                if i == 3 and e != 20:
-                    continue
                 data = ExperimentData()
                 data.sparseness = s
                 data.data_index = i
@@ -117,4 +109,7 @@ def ncf_exp():
 
 
 if __name__ == '__main__':
+    os.environ["CUDA_VISIBLE_DEVICES"] = "1"
     gmf_exp()
+    mlp_exp()
+    ncf_exp()

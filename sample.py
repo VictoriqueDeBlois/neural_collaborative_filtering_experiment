@@ -31,15 +31,15 @@ def screen_pairs(data):
     return pairs_set
 
 
-def create_sample(matrix):
+def create_sample(matrix, sparseness, division_num=5):
     save_root_path = './CSV_{}'.format(matrix)
     mkdir(save_root_path)
     matrix_data = load_original_matrix_data('./Data/{}Matrix.txt'.format(matrix))
     pairs = screen_pairs(matrix_data)
-    for ration in [5, 10, 15, 20, 30, 40, 50, 60, 70, 80, 90]:
+    for ration in sparseness:
         save_path = os.path.join(save_root_path, 'sparseness%d' % ration)
         mkdir(save_path)
-        for fileNum in range(1, 6):
+        for fileNum in range(1, division_num + 1):
             print(ration, fileNum)
             file_name_training = 'training{}.csv'.format(fileNum)
             file_name_training = os.path.join(save_path, file_name_training)
@@ -49,5 +49,4 @@ def create_sample(matrix):
 
 
 if __name__ == '__main__':
-    create_sample('rt')
-    create_sample('tp')
+    create_sample('rt', [1, 3])
