@@ -1,4 +1,3 @@
-import sqlite3
 from datetime import datetime
 
 import numpy as np
@@ -28,25 +27,6 @@ def experiment(sparseness, data_index, K, steps=5000, alpha=0.0002):
     print(exp_data)
     auto_insert_database(database_config, exp_data, 'mf_rt')
     # insert_database('experiment_data.db', 'experiment_mf_rt', exp_data)
-
-
-def create_experiment_database(path='experiment_data.db'):
-    conn = sqlite3.connect(path)
-    try:
-        conn.execute('''create table experiment_mf_rt(
-                        id int identity(1, 1) primary key,
-                        sparseness int,
-                        data_index int,
-                        K int,
-                        steps int,
-                        alpha double,
-                        mae double,
-                        rmse double
-                        )''')
-    except sqlite3.Error as error:
-        print(error)
-    conn.commit()
-    conn.close()
 
 
 if __name__ == '__main__':

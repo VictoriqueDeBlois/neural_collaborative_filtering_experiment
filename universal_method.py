@@ -11,6 +11,8 @@ from typing import Union
 import mysql.connector
 import numpy as np
 
+from improve_distance_calculate import save_extend_array
+
 user_num = 339
 ws_num = 5825
 
@@ -50,6 +52,16 @@ def load_data(file):
     item_id = np.array(item_id, dtype=int)
     rating = np.array(rating, dtype=float)
     return user_id, item_id, rating
+
+
+def load_training_data(sparseness, index, extend_near_num):
+    if extend_near_num <= 0:
+        training_file = load_csv_file(sparseness, index)
+    else:
+        training_file = save_csv_file(sparseness, index, extend_near_num)
+        if os.path.exists(training_file) is not True:
+            save_extend_array(sparseness, index, extend_near_num)
+    return load_data(training_file)
 
 
 def save_data(file, user_id, item_id, rating):
@@ -221,5 +233,6 @@ def query_table_where_table_no_greater_than(config: dict, table: str, table_no: 
 if __name__ == '__main__':
     print(mysql.connector.version.VERSION)
     from sensitive_info import database_config
+
     i = get_table_count(database_config, 'ncf_rt')
     print(i)

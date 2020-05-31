@@ -1,12 +1,13 @@
-import os
-import experiment.extend_mlp_model_exp
-from experiment_structure import ExperimentData
-from universal_method import send_email
-from sensitive_info import email_config
 from datetime import datetime
+
+import experiment.extend_mlp_model_exp
+import experiment.gmf_exp
 import experiment.mlp_exp
 import experiment.ncf_exp
-import experiment.gmf_exp
+import experiment.svd_exp
+from experiment_structure import ExperimentData
+from sensitive_info import email_config
+from universal_method import send_email
 
 
 def gmf_exp():
@@ -89,18 +90,36 @@ def ncf_exp():
     for s in [1, 3]:
         for i in [1, 2, 3, 4, 5]:
             for e in [0, 1, 2, 3, 4, 5, 10, 15, 20]:
-                data = ExperimentData()
-                data.sparseness = s
-                data.data_index = i
-                data.mf_dim = 8
-                data.epochs = 30
-                data.batch_size = 128
-                data.layers = [64, 32, 16]
-                data.reg_layers = [0, 0, 0]
-                data.learning_rate = 0.007
-                data.extend_near_num = e
-                data.learner = 'adagrad'
-                experiment.ncf_exp.experiment(data, 'relu')
+                for d in [8]:
+                    data = ExperimentData()
+                    data.sparseness = s
+                    data.data_index = i
+                    data.mf_dim = d
+                    data.epochs = 30
+                    data.batch_size = 128
+                    data.layers = [64, 32, 16]
+                    data.reg_layers = [0, 0, 0]
+                    data.learning_rate = 0.007
+                    data.extend_near_num = e
+                    data.learner = 'adagrad'
+                    experiment.ncf_exp.experiment(data, 'relu')
+
+    for s in [1, 3]:
+        for i in [1, 4]:
+            for e in [0, 3]:
+                for d in [8, 128]:
+                    data = ExperimentData()
+                    data.sparseness = s
+                    data.data_index = i
+                    data.mf_dim = d
+                    data.epochs = 30
+                    data.batch_size = 128
+                    data.layers = [64, 32, 16]
+                    data.reg_layers = [0, 0, 0]
+                    data.learning_rate = 0.007
+                    data.extend_near_num = e
+                    data.learner = 'adagrad'
+                    experiment.ncf_exp.experiment(data, 'relu')
 
     send_email(receiver='haoran.x@outlook.com',
                title='NCF实验结束',
@@ -108,8 +127,16 @@ def ncf_exp():
                **email_config)
 
 
+def svd():
+    for s in [5, 10, 15, 20]:
+        for i in range(1, 6):
+            for e in [0, 1, 2, 3, 4, 5, 10, 15, 20]:
+                experiment.svd_exp.experiment(s, i, 0.1, e)
+    send_email(receiver='haoran.x@outlook.com',
+               title='SVD实验结束',
+               text="",
+               **email_config)
+
+
 if __name__ == '__main__':
-    os.environ["CUDA_VISIBLE_DEVICES"] = "1"
-    gmf_exp()
-    mlp_exp()
-    ncf_exp()
+    svd()

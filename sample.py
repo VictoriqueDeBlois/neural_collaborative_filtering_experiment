@@ -2,7 +2,7 @@
 """
 Created on Fri Apr 22 10:34:38 2016
 
-@author: gray wolf
+@author:
 """
 import os
 import random
@@ -49,4 +49,4 @@ def create_sample(matrix, sparseness, division_num=5):
 
 
 if __name__ == '__main__':
-    create_sample('rt', [1, 3])
+    create_sample('rt', [5, 10, 15, 20])

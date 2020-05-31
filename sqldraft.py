@@ -66,11 +66,11 @@ if __name__ == '__main__':
     cursor = cnx.cursor()
     output = []
 
-    for sparseness in [15]:
+    for sparseness in [1, 3]:
         for index in [1, 2, 3, 4, 5]:
             for performance in ['mae', 'rmse']:
                 row = []
-                for approach in ['gmf']:
+                for approach in ['mlp']:
                     for extend in [0, 1, 2, 3, 4, 5, 10, 15, 20]:
                         row.append(one_query_plus(cursor, performance, approach, sparseness, index, extend))
                 output.append(','.join(row))

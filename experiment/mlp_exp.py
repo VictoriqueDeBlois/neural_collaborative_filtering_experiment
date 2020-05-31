@@ -7,9 +7,8 @@ from keras import metrics
 from keras.optimizers import Adagrad, Adam, SGD, RMSprop
 
 import custom_model.MLP
-from improve_distance_calculate import save_extend_array
 from sensitive_info import database_config, email_config
-from universal_method import load_csv_file, auto_insert_database, save_csv_file
+from universal_method import load_csv_file, auto_insert_database, load_training_data
 from universal_method import load_data, ws_num, user_num, mkdir
 from universal_method import send_email
 
@@ -45,13 +44,7 @@ def experiment(**kwargs):
     dataset_name = 'sparseness%s_%s' % (sparseness, index)
     model_out_file = '%s_MLP_%s_%s.h5' % (dataset_name, layers, datetime.now())
 
-    if extend_near_num <= 0:
-        training_file = load_csv_file(sparseness, index)
-    else:
-        training_file = save_csv_file(sparseness, index, extend_near_num)
-        if os.path.exists(training_file) is not True:
-            save_extend_array(sparseness, index, extend_near_num)
-    userId, itemId, rating = load_data(training_file)
+    userId, itemId, rating = load_training_data(sparseness, index, extend_near_num)
     test_userId, test_itemId, test_rating = load_data(load_csv_file(sparseness, index, training_set=False))
 
     early_stop = keras.callbacks.EarlyStopping(monitor='mean_absolute_error', min_delta=0.0002, patience=10)
