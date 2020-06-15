@@ -11,8 +11,6 @@ from typing import Union
 import mysql.connector
 import numpy as np
 
-from improve_distance_calculate import save_extend_array
-
 user_num = 339
 ws_num = 5825
 
@@ -60,6 +58,7 @@ def load_training_data(sparseness, index, extend_near_num):
     else:
         training_file = save_csv_file(sparseness, index, extend_near_num)
         if os.path.exists(training_file) is not True:
+            from improve_distance_calculate import save_extend_array
             save_extend_array(sparseness, index, extend_near_num)
     return load_data(training_file)
 
