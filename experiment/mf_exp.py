@@ -4,7 +4,7 @@ import numpy as np
 from sklearn.decomposition import NMF
 
 from sensitive_info import database_config
-from universal_method import load_csv_file, auto_insert_database, evaluate, create_sparse_matrix
+from universal_method import auto_insert_database, evaluate, create_sparse_matrix, load_training_data
 
 
 def experiment(sparseness, data_index, K, steps=5000, alpha=0.0002):
@@ -15,7 +15,8 @@ def experiment(sparseness, data_index, K, steps=5000, alpha=0.0002):
         'steps': steps,
         'alpha': alpha
     }
-    R = create_sparse_matrix(load_csv_file(sparseness, data_index))
+    extend_near_num = 0
+    R = create_sparse_matrix(load_training_data(sparseness, data_index, extend_near_num))
     model = NMF(n_components=K, alpha=alpha, max_iter=steps)
     w = model.fit_transform(R)
     h = model.components_

@@ -169,8 +169,8 @@ def evaluate(sparseness, index, fit_matrix):
     return mae, rmse
 
 
-def create_sparse_matrix(filename, num_users=user_num, num_items=ws_num):
-    user_ls, ws_ls, rt = load_data(filename)
+def create_sparse_matrix(data, num_users=user_num, num_items=ws_num):
+    user_ls, ws_ls, rt = data
     array_obj = np.zeros((num_users, num_items))
     array_obj[user_ls, ws_ls] = rt
     return array_obj

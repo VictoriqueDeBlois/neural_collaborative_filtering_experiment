@@ -139,4 +139,4 @@ def svd():
 
 
 if __name__ == '__main__':
-    svd()
+    gmf_exp()

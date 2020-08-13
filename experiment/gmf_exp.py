@@ -76,7 +76,7 @@ def experiment(**kwargs):
     exp_data['rmse'] = float(np.sqrt(mse))
     exp_data['datetime'] = datetime.now()
     print(exp_data)
-    auto_insert_database(database_config, exp_data, 'gmf_rt')
+    # auto_insert_database(database_config, exp_data, 'gmf_rt')
     return exp_data
 
 
