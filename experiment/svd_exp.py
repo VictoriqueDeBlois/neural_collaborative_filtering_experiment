@@ -20,26 +20,26 @@ def sigma_pct(sigma, percentage):
             return k
 
 
-def experiment(sparseness, index, percentage, extend_near_num):
+def experiment(sparseness, index, percentage, extend_near_num, matrix_type):
     exp_data = {
         'sparseness': sparseness,
         'data_index': index,
         'extend': extend_near_num,
         'percentage': percentage
     }
-    matrix = create_sparse_matrix(load_training_data(sparseness, index, extend_near_num))
+    matrix = create_sparse_matrix(load_training_data(sparseness, index, extend_near_num, matrix_type=matrix_type))
     U, Sigma, VT = la.svd(matrix)
     K = sigma_pct(Sigma, percentage)
     U1 = U[:, :K]
     VT1 = VT[:K, :]
     Sigma1 = np.eye(K) * Sigma[:K]
     R = np.matmul(np.matmul(U1, Sigma1), VT1)
-    mae, rmse = evaluate(sparseness, index, R)
+    mae, rmse = evaluate(sparseness, index, R, matrix_type=matrix_type)
     exp_data["mae"] = float(mae)
     exp_data["rmse"] = float(rmse)
     exp_data['datetime'] = datetime.now()
     print(exp_data)
-    auto_insert_database(database_remote_config, exp_data, 'svd_rt')
+    auto_insert_database(database_remote_config, exp_data, f'svd_{matrix_type}')
     # insert_database('experiment_data.db', "experiment_svd_rt", exp_data)
 
 

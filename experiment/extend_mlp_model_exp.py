@@ -7,7 +7,7 @@ from keras.optimizers import Adagrad, Adam, SGD, RMSprop
 import custom_model.extend_mlp_model
 from improve_distance_calculate import calculate_distance, convert_distance_result
 from sensitive_info import database_config
-from universal_method import load_csv_file, auto_insert_database
+from universal_method import csv_file_path, auto_insert_database
 from universal_method import load_data, ws_num, user_num, mkdir
 
 
@@ -57,14 +57,14 @@ def experiment(**kwargs):
     dataset_name = 'sparseness%s_%s' % (sparseness, index)
     model_out_file = '%s_exMLP_%s_%s_%s.h5' % (dataset_name, layers, fake_layers, datetime.now())
 
-    userId, itemId, rating = load_data(load_csv_file(sparseness, index))
+    userId, itemId, rating = load_data(csv_file_path(sparseness, index))
 
-    result = calculate_distance(load_csv_file(sparseness, index))
+    result = calculate_distance(csv_file_path(sparseness, index))
     distance = convert_distance_result(result)
 
     fake_user_id, userId, itemId, rating = extend_array(extend_near_num, distance, userId, itemId, rating)
 
-    test_userId, test_itemId, test_rating = load_data(load_csv_file(sparseness, index, training_set=False))
+    test_userId, test_itemId, test_rating = load_data(csv_file_path(sparseness, index, training_set=False))
 
     # early_stop = keras.callbacks.EarlyStopping(monitor='mean_absolute_error', min_delta=0.0002, patience=10)
 

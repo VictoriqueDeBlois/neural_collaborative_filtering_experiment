@@ -5,7 +5,7 @@ from collections import Iterable
 import numpy as np
 
 from sensitive_info import email_config
-from universal_method import load_csv_file, load_data, save_csv_file, save_data, send_email
+from universal_method import csv_file_path, load_data, extend_csv_file_path, save_data, send_email
 
 
 def calculate_distance(file) -> list:
@@ -100,19 +100,19 @@ def extend_array(times: int, distance: dict, user_id: np.ndarray, item_id: np.nd
     return users, items, ratings
 
 
-def extend_array_and_save(sparseness, index, extend_near_num, distance, userId, itemId, rating):
+def extend_array_and_save(sparseness, index, extend_near_num, distance, userId, itemId, rating, matrix_type):
     u, i, r = extend_array(extend_near_num, distance, userId, itemId, rating)
-    save_data(save_csv_file(sparseness, index, extend_near_num), u, i, r)
+    save_data(extend_csv_file_path(sparseness, index, extend_near_num, matrix_type=matrix_type), u, i, r)
 
 
-def save_extend_array(sparseness, index, extend_near_nums):
+def save_extend_array(sparseness, index, extend_near_nums, matrix_type):
     if isinstance(extend_near_nums, Iterable) is not True:
         extend_near_nums = (extend_near_nums, )
-    userId, itemId, rating = load_data(load_csv_file(sparseness, index))
-    result = calculate_distance(load_csv_file(sparseness, index))
+    userId, itemId, rating = load_data(csv_file_path(sparseness, index, matrix_type=matrix_type))
+    result = calculate_distance(csv_file_path(sparseness, index, matrix_type=matrix_type))
     distance = convert_distance_result(result)
     for e in extend_near_nums:
-        extend_array_and_save(sparseness, index, e, distance, userId, itemId, rating)
+        extend_array_and_save(sparseness, index, e, distance, userId, itemId, rating, matrix_type=matrix_type)
 
 
 def main_fork():
@@ -132,11 +132,11 @@ def main_1():
     sparseness = 5
     index = 1
     extend_near_num = 1
-    userId, itemId, rating = load_data(load_csv_file(sparseness, index))
-    result = calculate_distance(load_csv_file(sparseness, index))
+    userId, itemId, rating = load_data(csv_file_path(sparseness, index))
+    result = calculate_distance(csv_file_path(sparseness, index))
     distance = convert_distance_result(result)
 
-    file = save_csv_file(sparseness, index, extend_near_num)
+    file = extend_csv_file_path(sparseness, index, extend_near_num)
     print(file)
     u, i, r = extend_array(extend_near_num, distance, userId, itemId, rating)
     save_data(file, u, i, r)
@@ -144,7 +144,7 @@ def main_1():
 
 def main():
     t1 = time()
-    r = calculate_distance(load_csv_file(5, 1))
+    r = calculate_distance(csv_file_path(5, 1))
     c_r = convert_distance_result(r)
     print(time() - t1)
     for k, v in c_r.items():

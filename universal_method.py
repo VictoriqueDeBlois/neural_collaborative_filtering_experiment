@@ -1,10 +1,7 @@
 import os
-import smtplib
 import sqlite3
 import time
 from datetime import date, datetime, time
-from email.header import Header
-from email.mime.text import MIMEText
 from os.path import join, dirname
 from typing import Union
 
@@ -20,7 +17,7 @@ def load_original_matrix_data(file_name):
     return original_data
 
 
-def load_csv_file(sparseness, index, matrix_type='rt', training_set=True, ext='csv'):
+def csv_file_path(sparseness, index, matrix_type='rt', training_set=True, ext='csv'):
     file = 'CSV_{matrix_type}/sparseness{sparseness}/{data}{index}.{ext}' \
         .format(matrix_type=matrix_type, sparseness=sparseness,
                 data='training' if training_set else 'test',
@@ -29,7 +26,7 @@ def load_csv_file(sparseness, index, matrix_type='rt', training_set=True, ext='c
     return join(dirname(__file__), file)
 
 
-def save_csv_file(sparseness, index, extend, matrix_type='rt', ext='csv'):
+def extend_csv_file_path(sparseness, index, extend, matrix_type='rt', ext='csv'):
     file = 'CSV_{matrix_type}/sparseness{sparseness}/{data}{index}_ex{extend}.{ext}' \
         .format(matrix_type=matrix_type, sparseness=sparseness, extend=extend,
                 data='training',
@@ -52,14 +49,14 @@ def load_data(file):
     return user_id, item_id, rating
 
 
-def load_training_data(sparseness, index, extend_near_num):
+def load_training_data(sparseness, index, extend_near_num, matrix_type='rt'):
     if extend_near_num <= 0:
-        training_file = load_csv_file(sparseness, index)
+        training_file = csv_file_path(sparseness, index, matrix_type=matrix_type)
     else:
-        training_file = save_csv_file(sparseness, index, extend_near_num)
+        training_file = extend_csv_file_path(sparseness, index, extend_near_num, matrix_type=matrix_type)
         if os.path.exists(training_file) is not True:
             from improve_distance_calculate import save_extend_array
-            save_extend_array(sparseness, index, extend_near_num)
+            save_extend_array(sparseness, index, extend_near_num, matrix_type=matrix_type)
     return load_data(training_file)
 
 
@@ -161,8 +158,8 @@ def auto_add_column(cursor, diff_keys: set, data: dict, table: str):
         cursor.execute(add_query.format(table, key, convert_type(type(data[key]))))
 
 
-def evaluate(sparseness, index, fit_matrix):
-    u, i, r = load_data(load_csv_file(sparseness, index, training_set=False))
+def evaluate(sparseness, index, fit_matrix, matrix_type='rt'):
+    u, i, r = load_data(csv_file_path(sparseness, index, training_set=False, matrix_type=matrix_type))
     y = fit_matrix[u, i]
     mae = np.sum(np.abs(y - r)) / len(r)
     rmse = np.sqrt(np.sum(np.square(y - r)) / len(r))
@@ -176,14 +173,19 @@ def create_sparse_matrix(data, num_users=user_num, num_items=ws_num):
     return array_obj
 
 
-def send_email(receiver, title, text, mail_host=None, mail_user=None, mail_pass=None, **kwargs):
-    if 'mail_host' in kwargs:
-        mail_host = kwargs['mail_host']
+def send_email(receiver, title, text, smtp_server=None, mail_user=None, mail_pass=None, **kwargs):
+    import smtplib
+    import ssl
+    from email.header import Header
+    from email.mime.text import MIMEText
+
+    if 'smtp_server' in kwargs:
+        smtp_server = kwargs['smtp_server']
     if 'mail_user' in kwargs:
         mail_user = kwargs['mail_user']
     if 'mail_pass' in kwargs:
         mail_pass = kwargs['mail_pass']
-    if mail_pass is None or mail_user is None or mail_host is None:
+    if mail_pass is None or mail_user is None or smtp_server is None:
         return
     # 第三方 SMTP 服务
     sender = mail_user
@@ -191,16 +193,16 @@ def send_email(receiver, title, text, mail_host=None, mail_user=None, mail_pass=
     message = MIMEText(text, 'plain', 'utf-8')
     subject = title
     message['Subject'] = Header(subject, 'utf-8')
-    message['from'] = sender
-    message['to'] = receiver
+    # message['from'] = sender
+    # message['to'] = receiver
 
     try:
-        smtp_obj = smtplib.SMTP_SSL(host=mail_host)
-        smtp_obj.connect(mail_host, smtplib.SMTP_SSL_PORT)
-        smtp_obj.login(mail_user, mail_pass)
-        smtp_obj.sendmail(sender, receiver, message.as_string())
+        context = ssl.create_default_context()
+        port = 465
+        with smtplib.SMTP_SSL(smtp_server, port, context=context) as server:
+            server.login(mail_user, mail_pass)
+            server.sendmail(sender, receiver, message.as_string())
         print("邮件发送成功")
-        smtp_obj.quit()
     except smtplib.SMTPException as e:
         print(e)
         print("Error: 无法发送邮件")

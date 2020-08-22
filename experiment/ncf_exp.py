@@ -9,11 +9,11 @@ from keras.optimizers import Adagrad, Adam, SGD, RMSprop
 import custom_model.NeuMF
 from experiment_structure import ExperimentData
 from sensitive_info import database_config
-from universal_method import load_csv_file, auto_insert_database, load_training_data
+from universal_method import csv_file_path, auto_insert_database, load_training_data
 from universal_method import load_data, ws_num, user_num, mkdir
 
 
-def experiment(experiment_data: ExperimentData, last_activation):
+def experiment(experiment_data: ExperimentData, last_activation, matrix_type):
     sparseness = experiment_data.sparseness  # 5
     index = experiment_data.data_index  # 3
     mf_dim = experiment_data.mf_dim  # 32
@@ -28,11 +28,14 @@ def experiment(experiment_data: ExperimentData, last_activation):
                  'rmsprop': RMSprop(lr=learning_rate),
                  'adam': Adam(lr=learning_rate),
                  'sgd': SGD(lr=learning_rate)}[learner]
+    matrix_type = matrix_type
+
     dataset_name = 'sparseness%s_%s' % (sparseness, index)
     model_out_file = '%s_NeuMF_%d_%s_%s.h5' % (dataset_name, mf_dim, layers, datetime.now())
 
-    userId, itemId, rating = load_training_data(sparseness, index, extend_near_num)
-    test_userId, test_itemId, test_rating = load_data(load_csv_file(sparseness, index, training_set=False))
+    userId, itemId, rating = load_training_data(sparseness, index, extend_near_num, matrix_type=matrix_type)
+    test_userId, test_itemId, test_rating = \
+        load_data(csv_file_path(sparseness, index, training_set=False, matrix_type=matrix_type))
 
     early_stop = keras.callbacks.EarlyStopping(monitor='mean_absolute_error', min_delta=0.0002, patience=10)
 
@@ -63,7 +66,7 @@ def experiment(experiment_data: ExperimentData, last_activation):
     exp_data['datetime'] = datetime.now()
     exp_data['last_activation'] = last_activation
     print(exp_data)
-    auto_insert_database(database_config, exp_data, 'ncf_rt')
+    auto_insert_database(database_config, exp_data, f'ncf_{matrix_type}')
 
 
 if __name__ == '__main__':

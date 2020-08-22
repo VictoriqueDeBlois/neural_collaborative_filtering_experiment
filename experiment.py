@@ -1,5 +1,7 @@
 from datetime import datetime
 
+import os
+
 import experiment.extend_mlp_model_exp
 import experiment.gmf_exp
 import experiment.mlp_exp
@@ -63,8 +65,8 @@ def extend_mlp_exp():
 
 
 def mlp_exp():
-    for s in [1, 3]:
-        for i in [1, 2, 3, 4, 5]:
+    for s in [5, 10, 15, 20]:
+        for i in [1]:
             for a in ['relu']:
                 for e in [0, 1, 2, 3, 4, 5, 10, 15, 20]:
                     exp_data = {
@@ -77,7 +79,8 @@ def mlp_exp():
                         'last_activation': a,
                         'learning_rate': 0.007,
                         'extend_near_num': e,
-                        'learner': 'adagrad'
+                        'learner': 'adam',
+                        'matrix_type': 'tp'
                     }
                     experiment.mlp_exp.experiment(**exp_data)
     send_email(receiver='haoran.x@outlook.com',
@@ -87,8 +90,8 @@ def mlp_exp():
 
 
 def ncf_exp():
-    for s in [1, 3]:
-        for i in [1, 2, 3, 4, 5]:
+    for s in [5, 10, 15, 20]:
+        for i in [1]:
             for e in [0, 1, 2, 3, 4, 5, 10, 15, 20]:
                 for d in [8]:
                     data = ExperimentData()
@@ -101,25 +104,8 @@ def ncf_exp():
                     data.reg_layers = [0, 0, 0]
                     data.learning_rate = 0.007
                     data.extend_near_num = e
-                    data.learner = 'adagrad'
-                    experiment.ncf_exp.experiment(data, 'relu')
-
-    for s in [1, 3]:
-        for i in [1, 4]:
-            for e in [0, 3]:
-                for d in [8, 128]:
-                    data = ExperimentData()
-                    data.sparseness = s
-                    data.data_index = i
-                    data.mf_dim = d
-                    data.epochs = 30
-                    data.batch_size = 128
-                    data.layers = [64, 32, 16]
-                    data.reg_layers = [0, 0, 0]
-                    data.learning_rate = 0.007
-                    data.extend_near_num = e
-                    data.learner = 'adagrad'
-                    experiment.ncf_exp.experiment(data, 'relu')
+                    data.learner = 'adam'
+                    experiment.ncf_exp.experiment(data, 'relu', matrix_type='tp')
 
     send_email(receiver='haoran.x@outlook.com',
                title='NCF实验结束',
@@ -129,9 +115,9 @@ def ncf_exp():
 
 def svd():
     for s in [5, 10, 15, 20]:
-        for i in range(1, 6):
+        for i in [1]:
             for e in [0, 1, 2, 3, 4, 5, 10, 15, 20]:
-                experiment.svd_exp.experiment(s, i, 0.1, e)
+                experiment.svd_exp.experiment(s, i, 0.1, e, matrix_type='tp')
     send_email(receiver='haoran.x@outlook.com',
                title='SVD实验结束',
                text="",
@@ -139,4 +125,5 @@ def svd():
 
 
 if __name__ == '__main__':
-    gmf_exp()
+    os.environ["CUDA_VISIBLE_DEVICES"] = "2"
+    ncf_exp()

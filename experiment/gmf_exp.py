@@ -8,7 +8,7 @@ from keras.optimizers import Adagrad, Adam, SGD, RMSprop
 
 import custom_model.GMF
 from sensitive_info import database_config, email_config
-from universal_method import load_csv_file, auto_insert_database, load_training_data
+from universal_method import csv_file_path, auto_insert_database, load_training_data
 from universal_method import load_data, ws_num, user_num, mkdir
 from universal_method import send_email
 
@@ -24,6 +24,7 @@ def experiment(**kwargs):
     learning_rate = kwargs['learning_rate']
     extend_near_num = kwargs['extend_near_num']
     learner = kwargs['learner']
+    matrix_type = kwargs['matrix_type']
     exp_data = {
         'sparseness': sparseness,
         'index': index,
@@ -46,8 +47,9 @@ def experiment(**kwargs):
     model_out_file = '%s_GMF_%s_extend_%s_%s.h5' % (dataset_name, regs, extend_near_num, datetime.now())
 
     # load file
-    userId, itemId, rating = load_training_data(sparseness, index, extend_near_num)
-    test_userId, test_itemId, test_rating = load_data(load_csv_file(sparseness, index, training_set=False))
+    userId, itemId, rating = load_training_data(sparseness, index, extend_near_num, matrix_type=matrix_type)
+    test_userId, test_itemId, test_rating = \
+        load_data(csv_file_path(sparseness, index, training_set=False, matrix_type=matrix_type))
     # load end
 
     early_stop = keras.callbacks.EarlyStopping(monitor='mean_absolute_error', min_delta=0.0002, patience=10)
@@ -76,7 +78,7 @@ def experiment(**kwargs):
     exp_data['rmse'] = float(np.sqrt(mse))
     exp_data['datetime'] = datetime.now()
     print(exp_data)
-    # auto_insert_database(database_config, exp_data, 'gmf_rt')
+    auto_insert_database(database_config, exp_data, f'gmf_{matrix_type}')
     return exp_data
 
 
