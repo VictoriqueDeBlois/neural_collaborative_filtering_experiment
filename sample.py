@@ -49,4 +49,4 @@ def create_sample(matrix, sparseness, division_num=5):
 
 
 if __name__ == '__main__':
-    create_sample('rt', [5, 10, 15, 20])
+    create_sample('tp', [])

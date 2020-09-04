@@ -23,7 +23,7 @@ def sigma_pct(sigma, percentage):
 def experiment(sparseness, index, percentage, extend_near_num, matrix_type):
     exp_data = {
         'sparseness': sparseness,
-        'data_index': index,
+        'index': index,
         'extend': extend_near_num,
         'percentage': percentage
     }
@@ -45,9 +45,9 @@ def experiment(sparseness, index, percentage, extend_near_num, matrix_type):
 
 if __name__ == '__main__':
     args = []
-    for s in [5, 10, 15, 20]:
-        for i in range(1, 6):
-            for e in [0, 1, 2, 3, 4, 5, 10, 15, 20]:
+    for s in [1, 3]:
+        for i in [1]:
+            for e in [0]:
                 args.append((s, i, 0.1, e))
 
     from concurrent.futures import ThreadPoolExecutor

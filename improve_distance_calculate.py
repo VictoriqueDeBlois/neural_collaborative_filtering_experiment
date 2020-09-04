@@ -1,7 +1,6 @@
 import math
 from multiprocessing import Pool
 from time import time
-from collections import Iterable
 import numpy as np
 
 from sensitive_info import email_config
@@ -66,7 +65,7 @@ def distance(u: dict, v: dict, lambda_s: dict) -> float:
     v_set = set(v.keys())
     m_set = u_set & v_set
     if len(m_set) == 0:
-        return 0.0
+        return np.nan
     u_array = np.array(list(map(lambda x: u[x], m_set)))
     v_array = np.array(list(map(lambda x: v[x], m_set)))
     lambda_array = np.array(list(map(lambda x: lambda_s[x], m_set)))
@@ -106,8 +105,8 @@ def extend_array_and_save(sparseness, index, extend_near_num, distance, userId, 
 
 
 def save_extend_array(sparseness, index, extend_near_nums, matrix_type):
-    if isinstance(extend_near_nums, Iterable) is not True:
-        extend_near_nums = (extend_near_nums, )
+    if isinstance(extend_near_nums, int) is True:
+        extend_near_nums = (extend_near_nums,)
     userId, itemId, rating = load_data(csv_file_path(sparseness, index, matrix_type=matrix_type))
     result = calculate_distance(csv_file_path(sparseness, index, matrix_type=matrix_type))
     distance = convert_distance_result(result)
@@ -151,5 +150,34 @@ def main():
         print(k, v[:3])
 
 
+def test(data):
+    users_dict = sorted_data(sort_user(data))
+    items_dict = sorted_data(sort_item(data))
+    users = list(users_dict.keys())
+    U = len(users)
+
+    lambda_s = {}
+    for k, v in items_dict.items():
+        lambda_s[k] = math.log(U / len(v))
+
+    result = []
+    for i in range(U):
+        for j in range(i):
+            u = users[i]
+            v = users[j]
+            d_u_v = distance(users_dict[u], users_dict[v], lambda_s)
+            result.append([u, v, d_u_v])
+    return result
+
+
 if __name__ == '__main__':
-    main_fork()
+    users = [0, 0, 1, 1, 2]
+    items = [0, 2, 1, 2, 0]
+    rating = [0.2, 0.8, 0.1, 0.6, 0.1]
+    test_data = list(zip(users, items, rating))
+    r = test(test_data)
+    r = convert_distance_result(r)
+    print(r)
+    s = extend_array(1, r, users, items, rating)
+    for i in zip(s[0], s[1], s[2]):
+        print(i)

@@ -90,7 +90,7 @@ def mlp_exp():
 
 
 def ncf_exp():
-    for s in [5, 10, 15, 20]:
+    for s in [1, 3]:
         for i in [1]:
             for e in [0, 1, 2, 3, 4, 5, 10, 15, 20]:
                 for d in [8]:
@@ -114,10 +114,10 @@ def ncf_exp():
 
 
 def svd():
-    for s in [5, 10, 15, 20]:
+    for s in [1, 3]:
         for i in [1]:
-            for e in [0, 1, 2, 3, 4, 5, 10, 15, 20]:
-                experiment.svd_exp.experiment(s, i, 0.1, e, matrix_type='tp')
+            for e in [0]:
+                experiment.svd_exp.experiment(s, i, 0.1, e, matrix_type='rt')
     send_email(receiver='haoran.x@outlook.com',
                title='SVD实验结束',
                text="",
@@ -125,5 +125,5 @@ def svd():
 
 
 if __name__ == '__main__':
-    os.environ["CUDA_VISIBLE_DEVICES"] = "2"
-    ncf_exp()
+    # os.environ["CUDA_VISIBLE_DEVICES"] = "2"
+    svd()
